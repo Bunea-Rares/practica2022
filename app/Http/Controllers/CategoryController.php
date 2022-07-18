@@ -18,7 +18,9 @@ class CategoryController extends ApiController
      */
     public function getAll(Request $request)
     {
-
+        if(Category::all()->first() != null)
+            return $this->sendResponse(Category::all()->toArray());
+        return $this->sendError('Db is empty');
     }
 
     /**
@@ -62,11 +64,14 @@ class CategoryController extends ApiController
     }
 
     /**
-     * @param $id
+     * @param Category $category
      */
-    public function get($id)
+    public function get(Category $category)
     {
-
+        if($category->exists()) {
+            return $this->sendResponse($category->toArray());
+        }
+        return $this->sendError("Id doesn't exists");
     }
 
     /**
@@ -75,7 +80,30 @@ class CategoryController extends ApiController
      */
     public function update($id, Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|max:50',
+            'parent_id' => 'nullable|exists:categories,id'
+        ]);
+        if($validator->fails()) {
+            return $this->sendError('Bad request', $validator->messages()->toArray());
+        }
+        $category = Category::find($id);
+        if($category == null) {
+            return $this->sendError("Category doesn't exists");
+        }
+        if ($request->input('parent_id')) {
+            $parent = Category::find($request->input('parent_id'));
 
+            if ($parent->parent?->parent) {
+                return $this->sendError('You can\'t add a 3rd level subcategory!');
+            }
+        }
+        if($category->parent_id == $request->input('parent_id'))
+            return $this->sendError("Your request id and id can't match");
+        $category->parent_id = $request->input('parent_id');
+        $category->name = $request->input('name');
+        $category->save();
+        return $this->sendResponse($category->toArray());
     }
 
     /**
@@ -83,6 +111,12 @@ class CategoryController extends ApiController
      */
     public function delete($id)
     {
-
+        $category = Category::find($id);
+        if($category == null) {
+            return $this->sendError("Category doesn't exist");
+        }
+        $category->children()->delete();
+        $category->delete();
+        return $this->sendResponse('Success');
     }
 }

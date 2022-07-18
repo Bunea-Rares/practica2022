@@ -51,4 +51,28 @@ class UserController extends ApiController
             'user' => $user->toArray()
         ]);
     }
+
+    public function register(Request $request): JsonResponse
+    {
+      $validator = Validator::make($request->all(),[
+          'email' => 'required|email|unique:users,email',
+          'name' => 'required|max:50',
+          'password' => 'required|min:5'
+      ]);
+
+      if($validator->fails()) {
+          return $this->sendError('Bad Request!', $validator->messages()->toArray());
+      }
+
+      $user = new User();
+
+      $user->name = $request->input('name');
+      $user->email = $request->input('email');
+      $user->password = Hash::make($request->input('password'));
+      $user->email_verified_at = now();
+
+      $user->save();
+
+      return $this->sendResponse($user->toArray());
+    }
 }
