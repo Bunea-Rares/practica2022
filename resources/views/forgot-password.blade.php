@@ -1,13 +1,22 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-
-</body>
-</html>
+@if (Session::has('message'))
+    <div>
+        {{ Session::get('message') }}
+    </div>
+@endif
+<form action="{{ route('forget.password.post') }}" method="POST">
+    @csrf
+    <div>
+        <label for="email_address">E-Mail Address</label>
+        <div>
+            <input type="text" id="email_address" name="email" required autofocus>
+            @if ($errors->has('email'))
+                <span>{{ $errors->first('email') }}</span>
+            @endif
+        </div>
+    </div>
+    <div>
+        <button type="submit">
+            Send Password Reset Link
+        </button>
+    </div>
+</form>

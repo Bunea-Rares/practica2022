@@ -34,7 +34,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/products', [ProductController::class, 'getAll']);
 
-
+    Route::post('/product', [ProductController::class, 'add']);
+    Route::put('/product/{id}', [ProductController::class, 'update']);
+    Route::delete('product/{id}', [ProductController::class, 'delete']);
     //To know how to upload images and Test routes
     Route::post('/upload', [ProductController::class, 'upload']);
     Route::get('/products/{categoryId}', [ProductController::class, 'getAllProductsForCategory']);
