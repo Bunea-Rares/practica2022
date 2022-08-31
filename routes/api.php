@@ -19,8 +19,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/register', [UserController::class, 'register']);
+Route::post('/forgot-password', [UserController::class, 'forgot_password']);
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'cors'])->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
@@ -37,6 +38,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/product', [ProductController::class, 'add']);
     Route::put('/product/{id}', [ProductController::class, 'update']);
     Route::delete('product/{id}', [ProductController::class, 'delete']);
+
     //To know how to upload images and Test routes
     Route::post('/upload', [ProductController::class, 'upload']);
     Route::get('/products/{categoryId}', [ProductController::class, 'getAllProductsForCategory']);

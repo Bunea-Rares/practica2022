@@ -29,6 +29,7 @@ class ProductController extends ApiController
 
             $perPage = $request->get('perPage', 20);
             $search = $request->get('search', '');
+            $pageNumber = $request->get('pageNumber', 1);
 
             if ($search && $search !== '') {
                 $products = $products->where(function ($query) use ($search) {
@@ -49,7 +50,7 @@ class ProductController extends ApiController
                 $products = $products->where('status', $status);
             }
 
-            $products = $products->paginate($perPage);
+            $products = $products->paginate($perPage, ["*"], 'page', $pageNumber);
 
             $results = [
                 'data' => $products->items(),
@@ -69,7 +70,6 @@ class ProductController extends ApiController
 
     public function upload(Request $request)
     {
-        if ($request->has('image')) {
             $file = $request->file('image');
 
             $filename = 'P'.time().'.'.$file->getClientOriginalExtension();
@@ -79,7 +79,7 @@ class ProductController extends ApiController
             Storage::putFileAs($path, $file, $filename);
 
             return $path.$filename;
-        }
+
     }
 
     public function getAllProductsForCategory($categoryId)
@@ -136,8 +136,10 @@ class ProductController extends ApiController
                 'description' => 'required|min:10',
                 'quantity' => 'numeric',
                 'image' => 'nullable',
-                'status' => 'integer|required|min:0|max:1'
+                'status' => 'integer|required|min:0|max:1',
+                'price' => 'numeric|required'
             ]);
+
 
             if($validator->fails()) {
                 return $this->sendError('Bad request!', $validator->messages()->toArray());
@@ -162,7 +164,9 @@ class ProductController extends ApiController
                 'description' => 'required|min:10',
                 'quantity' => 'numeric',
                 'image' => 'nullable',
-                'status' => 'integer|required|min:0|max:1'
+                'status' => 'integer|required|min:0|max:1',
+                'price' => 'numeric|required'
+
             ]);
             if($validator->fails()) {
                 return $this->sendError('Bad request!', $validator->errors()->toArray());
@@ -172,7 +176,6 @@ class ProductController extends ApiController
             if(!$product) {
                 return $this->sendError('Product id doesn\'t exist');
             }
-            return $this->sendResponse($request->all());
             $this->extracted($request, $product);
             return $this->sendResponse($product->toArray());
         } catch (Exception $exception) {

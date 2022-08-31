@@ -20,7 +20,7 @@ class CategoryController extends ApiController
      * @param Request $request
      * @return JsonResponse
      */
-    public function getAll(Request $request): JsonResponse
+    public function  getAll(Request $request): JsonResponse
     {
         try {
             $categories = Category::query();

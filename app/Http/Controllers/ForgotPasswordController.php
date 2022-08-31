@@ -39,7 +39,6 @@ class ForgotPasswordController extends Controller
 
         ]);
 
-        $validator =
 
         $token = Str::random(64);
 

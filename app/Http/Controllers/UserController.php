@@ -8,9 +8,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 /**
  *
@@ -60,6 +63,48 @@ class UserController extends ApiController
 
             return $this->sendError('Something went wrong, please contact administrator!', [], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function forgot_password(Request $request)
+
+    {
+
+        $request->validate([
+
+            'email' => 'required|email|exists:users',
+
+        ]);
+
+
+        $token = Str::random(64);
+
+
+
+        DB::table('password_resets')->insert([
+
+            'email' => $request->email,
+
+            'token' => $token,
+
+            'created_at' => \Carbon\Carbon::now()
+
+        ]);
+
+
+
+        Mail::send('mail-forgot-password', ['token' => $token], function($message) use($request){
+
+            $message->to($request->email);
+
+            $message->subject('Reset Password');
+
+
+        });
+
+
+
+        return $this->sendResponse( 'We have e-mailed your password reset link!');
+
     }
 
     /**
